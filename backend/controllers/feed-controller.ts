@@ -1,17 +1,29 @@
-import { nextTick } from 'node:process';
 import Post from '../models/post-model.ts';
 import { ApiResourse } from '../types/controller-api-resource.d.ts';
 import clearImage from '../utils/clear-image.ts';
 
 const feedController: ApiResourse = {};
 
-feedController.index = (_req, res, next) => {
+feedController.index = (req, res, next) => {
+  const currentPage: number = req.query.page ?? 1;
+  const perPage = 2;
+  let totalItems = 0;
   Post.find()
-    .then((posts) =>
+    .countDocuments()
+    .then(async (postsCounts) => {
+      totalItems = postsCounts;
+
+      const posts = await Post.find()
+        .skip((currentPage - 1) * perPage)
+        .limit(perPage);
+
       res.status(200).json({
         posts,
-      })
-    )
+        totalItems,
+        currentPage,
+        perPage,
+      });
+    })
     .catch(next);
 };
 
@@ -102,7 +114,7 @@ feedController.destroy = (req, res, next) => {
         next(Error(`post with id=${postId} not found.`));
         return;
       }
-      
+
       clearImage(post.imageUrl);
       await post.deleteOne();
 
