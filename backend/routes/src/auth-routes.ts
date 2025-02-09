@@ -29,4 +29,6 @@ auth.put(
   authController.register
 );
 
+auth.post('/login', authController.login);
+
 export default auth;
