@@ -1,5 +1,6 @@
 import React, { Component, Fragment } from 'react';
 
+import { io } from 'socket.io-client';
 import Post from '../../components/Feed/Post/Post';
 import Button from '../../components/Button/Button';
 import FeedEdit from '../../components/Feed/FeedEdit/FeedEdit';
@@ -35,7 +36,29 @@ class Feed extends Component {
       .catch(this.catchError);
 
     this.loadPosts();
+    const socket = io('http://localhost:3000');
+    socket.on('posts', (data) => {
+      if (data.action === 'create') {
+        this.addPost(data.post);
+      }
+    });
   }
+
+  addPost = (post) => {
+    this.setState((prevState) => {
+      const updatedPosts = [...prevState.posts];
+      if (prevState.postPage === 1) {
+        if (prevState.posts.length >= 2) {
+          updatedPosts.pop();
+        }
+        updatedPosts.unshift(post);
+      }
+      return {
+        posts: updatedPosts,
+        totalPosts: prevState.totalPosts + 1,
+      };
+    });
+  };
 
   loadPosts = (direction) => {
     if (direction) {

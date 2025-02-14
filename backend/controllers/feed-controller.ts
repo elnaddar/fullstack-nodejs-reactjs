@@ -1,4 +1,5 @@
 import Post from '../models/post-model.ts';
+import io from '../socket.ts';
 import { ApiResourse } from '../types/controller-api-resource.d.ts';
 import clearImage from '../utils/clear-image.ts';
 
@@ -66,6 +67,7 @@ feedController.store = (req, res, next) => {
   post
     .save()
     .then((createdPost) => {
+      io.get().emit('posts', { action: 'create', post: createdPost });
       res.status(201).json({
         message: 'Post Created Successfully',
         post: createdPost,
