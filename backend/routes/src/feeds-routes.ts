@@ -4,10 +4,11 @@ import feedController from '../../controllers/feed-controller.ts';
 // @ts-types="@types/express-validator"
 import { body } from 'express-validator';
 import validator from '../../utils/validator.ts';
+import isAuth from '../../middlewares/is-auth-middleware.ts';
 
 const feeds = Router();
 
-feeds.get('/posts', feedController.index!);
+feeds.get('/posts', isAuth, feedController.index!);
 feeds.get('/posts/:postId', feedController.show!);
 feeds.post(
   '/posts',
